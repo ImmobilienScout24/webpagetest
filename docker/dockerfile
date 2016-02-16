@@ -47,12 +47,14 @@
                                                                                                                                             
 #Install Jpgetran                                                                                                                       
     #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm        
-    RUN rpm -ivh ftp://fr2.rpmfind.net/linux/centos/7.2.1511/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
+    #RUN rpm -ivh ftp://fr2.rpmfind.net/linux/centos/7.2.1511/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
+    RUN rpm -ivh http://dev.centos.org/c7.00.03/libjpeg-turbo/20140609194220/1.2.90-5.el7.x86_64/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
                                                                                                                                             
 #Install pillow                                                                                                                         
     RUN yum install -y libwebp                                                                                                              
     #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/python-pillow-2.0.0-17.gitd1c6db8.el7.x86_64.rpm   
-    RUN rpm -ivh ftp://195.220.108.108/linux/centos/7.2.1511/os/x86_64/Packages/python-pillow-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
+    #RUN rpm -ivh ftp://195.220.108.108/linux/centos/7.2.1511/os/x86_64/Packages/python-pillow-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
+    RUN rpm -ivh http://mirror.centos.org/centos/7/os/x86_64/Packages/python-pillow-devel-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
                                                                                                                                             
                                                                                                                                             
 # from https://github.com/WPO-Foundation/webpagetest base on pmeenan                                                                    
