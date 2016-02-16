@@ -1,0 +1,16 @@
+region: eu-west-1
+stacks:
+  wpt:
+    template-url: 'templates/wpt.yml'
+    timeout: 1200
+    parameters:
+      dnsDomain: 'infrastructure.wolke.is'
+      vpcId: "|Ref|vpc.id"
+      subnetIds: "|Ref|vpc.subnets"
+      amiId: ami-bf8b3ccc
+      dockerAppImage: wpt
+      dockerImageVersion: '|keepOrUse|latest'
+      sshKeyName: infrastructure
+      instanceType: t2.small
+      dockerContainerName: wpt 
+      elbIngress: 217.111.70.0/24

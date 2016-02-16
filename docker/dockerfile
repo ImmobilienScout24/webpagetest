@@ -1,0 +1,84 @@
+# DOCKER-VERION:                1.2.0                                                                                                    
+# DESCRIPTION:                  Image with private webpagetest (www.webpagetest.org)                                                            
+# TO_BUILD:                     docker build -t webpagetest .                                                                              
+# TO_RUN:                       docker run -d -p 8089:80 webpagetest                                                                            
+                                                                                                                                            
+    FROM centos:centos7                                                                                                                     
+    MAINTAINER Robby Blechschmidt
+                                                                                                                                            
+#Update system                                                                                                                          
+    RUN yum update -y                                                                                                                       
+                                                                                                                                            
+#Add Repos                                                                                                                              
+    RUN yum install -y epel-release                                                                                                         
+    RUN yum install -y http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm                            
+                                                                                                                                            
+# for httpd, php                                                                                                                        
+    RUN yum install -y httpd                                                                                                                
+    RUN yum install -y php php-devel php-pear php-mysql php-mbstring php-gd php-imap php-odbc php-xmlrpc php-xml php-pecl-apc               
+    RUN yum install -y gd gd-devel php-gd                                                                                                   
+    RUN yum install -y python-pip                                                                                                           
+                                                                                                                                            
+# PHP                                                                                                                                   
+    RUN sed -ri 's/zlib.output_compression = Off/zlib.output_compression = On/g' /etc/php.ini                                               
+    RUN sed -ri 's/upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php.ini                                                       
+    RUN sed -ri 's/post_max_size = 8M/post_max_size = 15M/g' /etc/php.ini                                                                   
+    RUN sed -ri 's/memory_limit = 128M/memory_limit = -1/g' /etc/php.ini                                                                    
+                                                                                                                                            
+                                                                                                                                            
+    RUN bash -c 'set -euo pipefail'                                                                                                         
+                                                                                                                                            
+    RUN yum install -y autoconf automake gcc gcc-c++ git libtool make nasm pkgconfig zlib-devel tar curl wget bzip2                         
+                                                                                                                                            
+                                                                                                                                            
+## install ImageMagick                                                                                                                  
+    RUN yum install -y ImageMagick ImageMagick-devel ImageMagick-perl                                                                       
+                                                                                                                                            
+## install exitftool                                                                                                                    
+    RUN yum install -y perl-Image-ExifTool                                                                                                  
+                                                                                                                                            
+#Install ffmpeg                                                                                                                         
+    RUN yum install -y ffmpeg                                                                                                               
+                                                                                                                                            
+#Install Jpgetran                                                                                                                       
+    #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm        
+    RUN rpm -ivh ftp://fr2.rpmfind.net/linux/centos/7.2.1511/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
+                                                                                                                                            
+#Install pillow                                                                                                                         
+    RUN yum install -y libwebp                                                                                                              
+    #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/python-pillow-2.0.0-17.gitd1c6db8.el7.x86_64.rpm   
+    RUN rpm -ivh ftp://195.220.108.108/linux/centos/7.2.1511/os/x86_64/Packages/python-pillow-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
+                                                                                                                                            
+                                                                                                                                            
+# from https://github.com/WPO-Foundation/webpagetest base on pmeenan                                                                    
+    ENV     WPT_VERSION 2.18
+
+# Filesystem setting                                                                                                            
+    RUN mkdir -p /var/www/html/tmp &&       \                                                                                       
+            chmod 777 /var/www/html/tmp &&  \                                                                                       
+            mkdir -p /var/www/html/dat &&   \                                                                                       
+            chmod 777 /var/www/html/dat &&  \                                                                                       
+            mkdir -p /var/www/html/results &&       \                                                                               
+            chmod 777 /var/www/html/results &&      \                                                                               
+            mkdir -p /var/www/html/work/jobs &&     \                                                                               
+            chmod 777 /var/www/html/work/jobs &&    \                                                                               
+            mkdir -p /var/www/html/work/video &&    \                                                                               
+            chmod 777 /var/www/html/work/video &&   \                                                                               
+            mkdir -p /var/www/html/logs &&  \                                                                                       
+            chmod 777 /var/www/html/logs                                                                                            
+                                                                                                                                    
+    RUN DIR=$(mktemp -d) && cd ${DIR} && \                                                                                          
+                  curl -L -Os https://github.com/WPO-Foundation/webpagetest/archive/WebPageTest-${WPT_VERSION}.tar.gz  && \         
+                  tar xvf WebPageTest-${WPT_VERSION}.tar.gz && \                                                                    
+                  cd webpagetest-WebPageTest-${WPT_VERSION} && \                                                                    
+                  cp -r www/*  /var/www/html/                                                                                       
+                                                                                                                                    
+                                                                                                                                    
+    COPY locations.ini /var/www/html/settings/                                                                                     
+    COPY connectivity.ini /var/www/html/settings/                                                                                  
+    COPY settings.ini /var/www/html/settings/                                                                                      
+                                                                                                                                
+                                                                                                                                
+EXPOSE 80                                                                                                                       
+ENTRYPOINT ["/usr/sbin/httpd"]                                                                                                  
+CMD ["-D", "FOREGROUND"] 

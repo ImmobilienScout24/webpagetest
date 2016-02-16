@@ -1,0 +1,296 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: webpagetest 
+Parameters:
+  dockerImageVersion:
+    Description: Docker image version
+    Type: String
+    Default: latest
+  dockerAppImage:
+    Description: Docker application image
+    Type: String
+  dockerContainerName:
+    Description: Name of the application container
+    Type: String
+  sshKeyName:
+    Description: SSH key name to access EC2 instances
+    Type: String
+  dnsDomain:
+    Description: DNS Domain to use for the service
+    Type: String
+  subnetIds:
+    ConstraintDescription: comma separated list of subnet-ids, defaults for Ireland
+    Default: subnet-4324981a, subnet-96ff8df3, subnet-a471ebd3
+    Description: Subnet IDs
+    Type: List<AWS::EC2::Subnet::Id>
+  amiId:
+    Description: Id of the base AMI
+    Type: AWS::EC2::Image::Id
+  vpcId:
+    ConstraintDescription: must begin with vpc- and can contain only alphanumeric
+      characters. defaults for Ireland
+    Description: VPC ID
+    Type: AWS::EC2::VPC::Id
+  instanceType:
+    Description: Instance Type
+    Type: String
+  elbIngress:
+    Description: CIDR for port 80 of the ELB
+    Type: String
+    Default: 0.0.0.0/0
+Resources:
+  dnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Static URL for stack
+      HostedZoneName:
+        '|Join|':
+          - '|Ref|dnsDomain'
+          - '.'
+      Name:
+        '|Join|.':
+          - Ref: AWS::StackName
+          - '|Ref|dnsDomain'
+      ResourceRecords:
+        - '|GetAtt|elb|DNSName'
+      TTL: '900'
+      Type: CNAME
+  asg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: "PT10M"
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: 1
+        MaxBatchSize: 1
+        PauseTime: PT10M
+        WaitOnResourceSignals: true
+    Properties:
+      AvailabilityZones:
+        Fn::GetAZs:
+          Ref: AWS::Region
+      Cooldown: '10'
+      HealthCheckGracePeriod: '600'
+      HealthCheckType: EC2
+      LaunchConfigurationName:
+        Ref: launchConfiguration
+      LoadBalancerNames:
+      - Ref: elb
+      MaxSize: '10'
+      MinSize: '1'
+      DesiredCapacity: '1'
+      TerminationPolicies:
+      - OldestlaunchConfiguration
+      VPCZoneIdentifier:
+        Ref: subnetIds
+  elb:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      CrossZone: true
+      #HealthCheck:
+      #  HealthyThreshold: '10'
+      #  Interval: '10'
+      #  Target: HTTP:80/nagios
+      #  Timeout: '5'
+      #  UnhealthyThreshold: '2'
+      Listeners:
+      - InstancePort: '80'
+        InstanceProtocol: HTTP
+        LoadBalancerPort: '80'
+        Protocol: HTTP
+      SecurityGroups:
+      - Ref: elbsg
+      Subnets:
+        Ref: subnetIds
+  elbsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ELB
+      VpcId:
+        Ref: vpcId
+  elbsgEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      DestinationSecurityGroupId:
+        Ref: sg
+      FromPort: 80
+      GroupId:
+        Ref: elbsg
+      IpProtocol: tcp
+      ToPort: 80
+  elbsgHealthEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      DestinationSecurityGroupId:
+        Ref: sg
+      FromPort: 8081
+      GroupId:
+        Ref: elbsg
+      IpProtocol: tcp
+      ToPort: 8081
+  elbsgIngressFromEverywhere:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp:
+        Ref: elbIngress
+      FromPort: '80'
+      GroupId:
+        Ref: elbsg
+      IpProtocol: tcp
+      ToPort: '80'
+  iamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - Ref: iamRole
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyName: DockerRepoReadonly
+        PolicyDocument:
+          Statement:
+          - Action:
+            - ecr:BatchCheckLayerAvailability
+            - ecr:GetDownloadUrlForLayer
+            - ecr:GetRepositoryPolicy
+            - ecr:DescribeRepositories
+            - ecr:ListImages
+            - ecr:BatchGetImage
+            Effect: Allow
+            Resource: "arn:aws:ecr:us-east-1:831383843208:repository/wpt"
+          Version: '2012-10-17'
+      - PolicyName: DockerAuth
+        PolicyDocument:
+          Statement:
+          - Action:
+            - ecr:GetAuthorizationToken
+            Effect: Allow
+            Resource: "*"
+          Version: '2012-10-17'
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:Describe*
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: "*"
+          Version: '2012-10-17'
+        PolicyName: awslogs
+      - PolicyDocument:
+          Statement:
+          - Action: elasticloadbalancing:*
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: allow-elb-healthcheck
+      - PolicyDocument:
+          Statement:
+          - Action: cloudwatch:PutMetricData
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: allow-putMetric
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - kinesis:DescribeStream
+            - kinesis:PutRecord
+            - kinesis:PutRecords
+            - kinesis:GetShardIterator
+            - kinesis:GetRecords
+            Effect: Allow
+            Resource: "*"
+          Version: '2012-10-17'
+        PolicyName: allow-put-on-kinesis-logstream
+  launchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Properties:
+      AssociatePublicIpAddress: true
+      SecurityGroups:
+        - "|ref|sg"
+      ImageId: "|ref|amiId"
+      InstanceType: "|ref|instanceType"
+      IamInstanceProfile: "|ref|iamInstanceProfile"
+      KeyName: "|ref|sshKeyName"
+      "@TaupageUserData@":
+        application_id: "|Ref|AWS::StackName"
+        application_version: "|Ref|dockerImageVersion"
+        source:
+          '|Join|':
+            - "831383843208.dkr.ecr.us-east-1.amazonaws.com/wpt:"
+            - "|Ref|dockerImageVersion"
+        #health_check_path: "/"
+        #health_check_port: 80
+        #health_check_timeout_seconds: 900
+        #healthcheck:
+        #  type: elb
+        #  loadbalancer_name: "|Ref|elb"
+        notify_cfn:
+          resource: asg
+          stack: "|Ref|AWS::StackName"
+        ports:
+          80: 80
+        root: true
+        runtime: Docker
+        docker:
+          log_driver: gelf
+          log_opt:
+            gelf-address: udp://localhost:12201
+  sg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: stack internal
+      VpcId:
+        Ref: vpcId
+  sgIngressFromELB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: 80
+      GroupId:
+        Ref: sg
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: elbsg
+      ToPort: 80
+  sgIngressHealthFromELB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: 8081
+      GroupId:
+        Ref: sg
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: elbsg
+      ToPort: 8081
+  sgIngressSshFromEverywhere:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: '22'
+      GroupId:
+        Ref: sg
+      IpProtocol: tcp
+      CidrIp: 0.0.0.0/0
+      ToPort: 22
+Outputs:
+  websiteURL:
+    Description: Service URL
+    Value:
+      '|Join|':
+        - 'http://'
+        - '|GetAtt|elb|DNSName'
+        - '/'
