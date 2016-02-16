@@ -4,7 +4,7 @@
 # TO_RUN:                       docker run -d -p 8089:80 webpagetest                                                                            
                                                                                                                                             
     FROM centos:centos7                                                                                                                     
-    MAINTAINER Robby Blechschmidt
+    MAINTAINER Robby Blechschmidt robby.blechschmidt@immobilienscout24.de
                                                                                                                                             
 #Update system                                                                                                                          
     RUN yum update -y                                                                                                                       
