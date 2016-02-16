@@ -5,15 +5,15 @@
                                                                                                                                             
     FROM centos:centos7                                                                                                                     
     MAINTAINER Robby Blechschmidt robby.blechschmidt@immobilienscout24.de
-                                                                                                                                            
-#Update system                                                                                                                          
-    RUN yum update -y                                                                                                                       
-    
+
 #Add PROXY
 
     ENV http_proxy http://proxy.v.rz.is:3128
     ENV https_proxy http://proxy.v.rz.is:3128     
-
+                                                                                                                                            
+#Update system                                                                                                                          
+    RUN yum update -y                                                                                                                       
+    
 #Add Repos                                                                                                                              
     RUN yum install -y epel-release                                                                                                         
     RUN yum install -y http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm                            
