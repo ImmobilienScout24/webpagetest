@@ -22,7 +22,7 @@
     RUN yum install -y httpd                                                                                                                
     RUN yum install -y php php-devel php-pear php-mysql php-mbstring php-gd php-imap php-odbc php-xmlrpc php-xml php-pecl-apc               
     RUN yum install -y gd gd-devel php-gd                                                                                                   
-    RUN yum install -y python-pip python-devel                                                                                                          
+    RUN yum install -y python-pip python-devel python-pillow                                                                                                         
                                                                                                                                             
 # PHP                                                                                                                                   
     RUN sed -ri 's/zlib.output_compression = Off/zlib.output_compression = On/g' /etc/php.ini                                               
