@@ -22,7 +22,7 @@
     RUN yum install -y httpd                                                                                                                
     RUN yum install -y php php-devel php-pear php-mysql php-mbstring php-gd php-imap php-odbc php-xmlrpc php-xml php-pecl-apc               
     RUN yum install -y gd gd-devel php-gd                                                                                                   
-    RUN yum install -y python-pip                                                                                                           
+    RUN yum install -y python-pip python-devel                                                                                                          
                                                                                                                                             
 # PHP                                                                                                                                   
     RUN sed -ri 's/zlib.output_compression = Off/zlib.output_compression = On/g' /etc/php.ini                                               
@@ -46,14 +46,10 @@
     RUN yum install -y ffmpeg                                                                                                               
                                                                                                                                             
 #Install Jpgetran                                                                                                                       
-    #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm        
-    #RUN rpm -ivh ftp://fr2.rpmfind.net/linux/centos/7.2.1511/os/x86_64/Packages/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
     RUN rpm -ivh http://dev.centos.org/c7.00.03/libjpeg-turbo/20140609194220/1.2.90-5.el7.x86_64/libjpeg-turbo-utils-1.2.90-5.el7.x86_64.rpm
                                                                                                                                             
 #Install pillow                                                                                                                         
     RUN yum install -y libwebp                                                                                                              
-    #RUN rpm -ivh ftp://mirror.switch.ch/pool/4/mirror/centos/7.1.1503/os/x86_64/Packages/python-pillow-2.0.0-17.gitd1c6db8.el7.x86_64.rpm   
-    #RUN rpm -ivh ftp://195.220.108.108/linux/centos/7.2.1511/os/x86_64/Packages/python-pillow-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
     RUN rpm -ivh http://mirror.centos.org/centos/7/os/x86_64/Packages/python-pillow-devel-2.0.0-19.gitd1c6db8.el7.x86_64.rpm
                                                                                                                                             
                                                                                                                                             
