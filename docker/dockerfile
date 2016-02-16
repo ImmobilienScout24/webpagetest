@@ -8,7 +8,12 @@
                                                                                                                                             
 #Update system                                                                                                                          
     RUN yum update -y                                                                                                                       
-                                                                                                                                            
+    
+#Add PROXY
+
+    ENV http_proxy http://proxy.v.rz.is:3128
+    ENV https_proxy http://proxy.v.rz.is:3128     
+
 #Add Repos                                                                                                                              
     RUN yum install -y epel-release                                                                                                         
     RUN yum install -y http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm                            
@@ -52,6 +57,10 @@
                                                                                                                                             
 # from https://github.com/WPO-Foundation/webpagetest base on pmeenan                                                                    
     ENV     WPT_VERSION 2.18
+
+# UNSET PROXY
+    ENV http_proxy ""
+    ENV https_proxy "" 
 
 # Filesystem setting                                                                                                            
     RUN mkdir -p /var/www/html/tmp &&       \                                                                                       
