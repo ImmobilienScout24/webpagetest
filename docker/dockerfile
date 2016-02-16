@@ -18,7 +18,7 @@
     RUN yum install -y epel-release                                                                                                         
     RUN yum install -y http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm                            
                                                                                                                                             
-# for httpd, php                                                                                                                        
+# for httpd, php, python                                                                                                                        
     RUN yum install -y httpd                                                                                                                
     RUN yum install -y php php-devel php-pear php-mysql php-mbstring php-gd php-imap php-odbc php-xmlrpc php-xml php-pecl-apc               
     RUN yum install -y gd gd-devel php-gd                                                                                                   
@@ -56,9 +56,6 @@
 # from https://github.com/WPO-Foundation/webpagetest base on pmeenan                                                                    
     ENV     WPT_VERSION 2.18
 
-# UNSET PROXY
-    ENV http_proxy ""
-    ENV https_proxy "" 
 
 # Filesystem setting                                                                                                            
     RUN mkdir -p /var/www/html/tmp &&       \                                                                                       
@@ -86,6 +83,10 @@
     COPY settings.ini /var/www/html/settings/                                                                                      
                                                                                                                                 
                                                                                                                                 
+# UNSET PROXY
+    ENV http_proxy ""
+    ENV https_proxy "" 
+
 EXPOSE 80                                                                                                                       
 ENTRYPOINT ["/usr/sbin/httpd"]                                                                                                  
 CMD ["-D", "FOREGROUND"] 
