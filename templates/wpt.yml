@@ -284,7 +284,7 @@ Resources:
       GroupId:
         Ref: sg
       IpProtocol: tcp
-      CidrIp: 0.0.0.0/0
+      CidrIp: 195.178.101.64/27
       ToPort: 22
 Outputs:
   websiteURL:
