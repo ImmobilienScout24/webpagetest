@@ -230,6 +230,8 @@ Resources:
       "@TaupageUserData@":
         application_id: "|Ref|AWS::StackName"
         application_version: "|Ref|dockerImageVersion"
+        ecr:
+                      region: eu-west-1
         source:
           '|Join|':
             - "831383843208.dkr.ecr.eu-west-1.amazonaws.com/wpt:"
