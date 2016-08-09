@@ -170,7 +170,7 @@ Resources:
             - ecr:ListImages
             - ecr:BatchGetImage
             Effect: Allow
-            Resource: "arn:aws:ecr:us-east-1:831383843208:repository/wpt"
+            Resource: "arn:aws:ecr:eu-west-1:831383843208:repository/wpt"
           Version: '2012-10-17'
       - PolicyName: DockerAuth
         PolicyDocument:
@@ -232,7 +232,7 @@ Resources:
         application_version: "|Ref|dockerImageVersion"
         source:
           '|Join|':
-            - "831383843208.dkr.ecr.us-east-1.amazonaws.com/wpt:"
+            - "831383843208.dkr.ecr.eu-west-1.amazonaws.com/wpt:"
             - "|Ref|dockerImageVersion"
         #health_check_path: "/"
         #health_check_port: 80
