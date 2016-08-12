@@ -88,12 +88,6 @@ Resources:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       CrossZone: true
-      #HealthCheck:
-      #  HealthyThreshold: '10'
-      #  Interval: '10'
-      #  Target: HTTP:80/nagios
-      #  Timeout: '5'
-      #  UnhealthyThreshold: '2'
       Listeners:
       - InstancePort: '80'
         InstanceProtocol: HTTP
@@ -236,12 +230,6 @@ Resources:
           '|Join|':
             - "831383843208.dkr.ecr.eu-west-1.amazonaws.com/wpt:"
             - "|Ref|dockerImageVersion"
-        #health_check_path: "/"
-        #health_check_port: 80
-        #health_check_timeout_seconds: 900
-        #healthcheck:
-        #  type: elb
-        #  loadbalancer_name: "|Ref|elb"
         notify_cfn:
           resource: asg
           stack: "|Ref|AWS::StackName"
