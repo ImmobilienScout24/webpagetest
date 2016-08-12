@@ -7,7 +7,7 @@ stacks:
       dnsDomain: 'infrastructure.wolke.is'
       vpcId: "|Ref|vpc.id"
       subnetIds: "|Ref|vpc.subnets"
-      amiId: ami-bf8b3ccc
+      amiId: ami-31bb3142
       dockerAppImage: wpt
       dockerImageVersion: '|keepOrUse|latest'
       sshKeyName: infrastructure
