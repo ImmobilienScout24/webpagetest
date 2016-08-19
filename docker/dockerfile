@@ -78,10 +78,7 @@
                   cp -r www/*  /var/www/html/                                                                                       
                                                                                                                                     
                                                                                                                                     
-    COPY locations.ini /var/www/html/settings/                                                                                     
-    COPY connectivity.ini /var/www/html/settings/                                                                                  
-    COPY settings.ini /var/www/html/settings/                                                                                      
-                                                                                                                                
+    COPY *.ini /var/www/html/settings/                                                                                     
                                                                                                                                 
 # UNSET PROXY
     ENV http_proxy ""
