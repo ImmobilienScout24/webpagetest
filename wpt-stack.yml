@@ -13,4 +13,4 @@ stacks:
       sshKeyName: infrastructure
       instanceType: t2.small
       dockerContainerName: wpt 
-      elbIngress: 0.0.0.0/8 
+      elbIngress: 0.0.0.0/0 
