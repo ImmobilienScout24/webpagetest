@@ -1,6 +1,6 @@
 region: eu-west-1
 stacks:
-  wpt:
+  wpt-git:
     template-url: 'templates/wpt.yml'
     timeout: 1200
     parameters:
